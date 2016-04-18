@@ -8,7 +8,8 @@ import com.typesafe.slick.driver.oracle.OracleDriver.api._
 case class Sorlcur_r(
                     pidm: Int,
                     seqNo: Int,
-                    cactCode: String
+                    cactCode: String,
+                    LmodCode: String
                     )
 
 class SORLCUR (tag: Tag) extends Table[Sorlcur_r](tag, "SORLCUR") {
@@ -16,5 +17,5 @@ class SORLCUR (tag: Tag) extends Table[Sorlcur_r](tag, "SORLCUR") {
   def SEQNO = column[Int]("SORLCUR_SEQNO")
   def CACT_CODE = column[String]("SORLCUR_CACT_CODE")
   def LmodCode = column[String]("SORLCURL_LMOD_CODE")
-  def * = (PIDM, SEQNO, CACT_CODE) <> (Sorlcur_r.tupled, Sorlcur_r.unapply)
+  def * = (PIDM, SEQNO, CACT_CODE, LmodCode) <> (Sorlcur_r.tupled, Sorlcur_r.unapply)
 }

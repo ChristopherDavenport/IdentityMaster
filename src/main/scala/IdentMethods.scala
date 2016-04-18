@@ -226,7 +226,8 @@ trait IdentMethods {
     * As an explanation of foldLeft - It is a recursive function that takes an argument in the first set of brackets
     * and a function which takes the type of the Iterable Sequence(in this case a sorlfos_r) and the argument type
     * (string) and produces and output of the type type of the argument(again, string) then repeats this for all
-    * elements in the sequence.
+    * elements in the sequence. In this case we create the major and a space for each record found starting with an
+    * initial space
     *
     *
     * @param user Some User
@@ -239,7 +240,7 @@ trait IdentMethods {
 
     def UserSorlcur(pidm: Int, sorlcur: Seq[Sorlcur_r]): Option[Sorlcur_r] = {
       val pidmsorlcur = sorlcur.filter(v =>
-        v.pidm == pidm && v.cactCode == "ACTIVE")
+        v.pidm == pidm && v.cactCode == "ACTIVE" && (v.LmodCode == "LEARNER" || v.LmodCode == "OUTCOME"))
       val sorted = pidmsorlcur.sortWith(_.seqNo > _.seqNo)
       val headRecord = sorted.headOption
       headRecord
