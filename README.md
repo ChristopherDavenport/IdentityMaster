@@ -1,4 +1,5 @@
-# Slick Oracle Test
+# Identity Master
+for Ellucian Banner
 
 #### Connect To Oracle To Create An Identity Table For Banner
 
