@@ -1,10 +1,12 @@
 import Tables._
+import slick.jdbc.JdbcBackend
+
 import language.implicitConversions
+
 /**
   * Created by chris on 4/9/16.
   */
 trait IdentMethods {
-
   /**
     * This takes a user and and all Spriden records to generate FirstName, LastName, and UserId Of the User.
     * Takes the first user that has the pidm and where the change ind is empty.
@@ -196,7 +198,8 @@ trait IdentMethods {
     * @param students A set of SGBSTDN records
     * @return A tuple of option strings showing student status and student level if they exist for the user
     */
-  def UserToStudentColumns(user: User, students: Seq[Student]): (Option[String], Option[String]) = {
+  def UserToStudentColumns(user: User, students: Seq[Student]):
+  (Option[String], Option[String], Option[String]) = {
     def UserStudent(pidm: Int, students: Seq[Student]): Option[Student] = {
       val pidmStudent = students.filter(_.Pidm == pidm)
       val sorted = pidmStudent.sortWith(_.TermCodeEff > _.TermCodeEff)
@@ -204,9 +207,12 @@ trait IdentMethods {
       headRecord
     }
 
-    def StudentColumns(student: Option[Student]):(Option[String], Option[String]) = student match {
-      case Some(s) => (Some(s.StudentStatus), Some(s.LevelCode))
-      case None => (None, None)
+    def StudentColumns(student: Option[Student]):(Option[String], Option[String], Option[String]) = student match {
+      case Some(s) =>
+        val term = DatabaseMethods.getMaxTerm().getOrElse("")
+        val classCode = DatabaseMethods.getClassCode(s.Pidm, s.LevelCode, term)
+        (Some(s.StudentStatus), Some(s.LevelCode), classCode)
+      case None => (None, None, None)
     }
 
     val UStudent = UserStudent(user.Pidm, students)
@@ -324,7 +330,8 @@ trait IdentMethods {
     * @param sorlfos Set of SORLFOS Records
     * @return An Option of an IdentRecord if there is some user to be run, and a None if we started with a None
     */
-  def GenerateIdent(user: Option[GoodDataUser],
+  def GenerateIdent(
+                    user: Option[GoodDataUser],
                     idents: Seq[Spriden_r],
                     ents: Seq[Gobeacc_r],
                     emps: Seq[Employee],
@@ -344,7 +351,7 @@ trait IdentMethods {
       val roleColumn = UserToRoleColumn(u, roles)
       val facultyColumns = UserToFacultyColumns(u, faculty)
       val facultyTypeColumn = UserToFacultyTypeColumn(u, perbfacs)
-      val studentColumns = UserToStudentColumns(u, students)
+      val studentColumns = UserToStudentColumns( u, students)
       val majorMinorColumns = UsertoMajorMinorColumns(u, sorlcur, sorlfos )
 
       Some(
@@ -368,6 +375,7 @@ trait IdentMethods {
           facultyTypeColumn,
           studentColumns._1,
           studentColumns._2,
+          studentColumns._3,
           majorMinorColumns._1,
           majorMinorColumns._2
         )
@@ -390,7 +398,8 @@ trait IdentMethods {
     * @param sorlfos A set of SORLFOS records
     * @return A set of IdentRecords that have been flattened to remove any that returned completely None
     */
-  def GenerateIdents(users: Seq[GoodDataUser],
+  def GenerateIdents(
+                     users: Seq[GoodDataUser],
                      identities: Seq[Spriden_r],
                      ents: Seq[Gobeacc_r],
                      employees: Seq[Employee],
@@ -404,7 +413,7 @@ trait IdentMethods {
                     ): Seq[IdentRecord] = {
 
     val optionIdentSeq: Seq[Option[IdentRecord]] = users.map(user =>
-      GenerateIdent( UserConverter(user), identities, ents, employees, jobs, roles, faculty, perbfacs, students, sorlcur, sorlfos))
+      GenerateIdent(UserConverter(user), identities, ents, employees, jobs, roles, faculty, perbfacs, students, sorlcur, sorlfos))
 
     val idents = optionIdentSeq.flatten
 

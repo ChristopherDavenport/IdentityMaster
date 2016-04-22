@@ -38,11 +38,6 @@ object createIdentMaster extends App with IdentMethods{
     val allPerbfac = Await.result(db.run(perbfac.result), Duration.Inf)
     println("Perbfac Returned")
 
-    //Recreate Schema and Drop All Old Records
-    Await.result(db.run(identities.schema.drop), Duration.Inf)
-    Await.result(db.run(identities.schema.create), Duration.Inf)
-    println("Schema Created")
-
     // Generating  All records
     val IdentityRecords = GenerateIdents(allUsers,
       allSpriden, allGobeacc, allEmployees, allJobs,
@@ -50,6 +45,11 @@ object createIdentMaster extends App with IdentMethods{
       allSorlcur, allSorlfos )
 
     println("Records Created")
+
+    //Recreate Schema and Drop All Old Records
+    Await.result(db.run(identities.schema.drop), Duration.Inf)
+    Await.result(db.run(identities.schema.create), Duration.Inf)
+    println("Schema Created")
 
     // Insert Them Into the Database
     Await.result(db.run(identities ++= IdentityRecords), Duration.Inf)

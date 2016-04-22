@@ -33,6 +33,7 @@ case class IdentRecord(
 
                         StudentStatus: Option[String],
                         StudentLevel: Option[String],
+                        StudentClass: Option[String],
 
                         Majors: Option[String],
                         Minors: Option[String]
@@ -67,6 +68,7 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
 
   def StudentStatus = column[Option[String]]("STUDENT_STATUS")
   def StudentLevel = column[Option[String]]("STUDENT_LEVEL")
+  def StudentClass = column[Option[String]]("STUDENT_CLASS")
 
   def StudentMajors = column[Option[String]]("STUDENT_MAJORS")
   def StudentMinors = column[Option[String]]("STUDENT_MINORS")
@@ -91,6 +93,7 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
     FacultyType,
     StudentStatus,
     StudentLevel,
+    StudentClass,
     StudentMajors,
     StudentMinors
     ) <> (IdentRecord.tupled, IdentRecord.unapply)
