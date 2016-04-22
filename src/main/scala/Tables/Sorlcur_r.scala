@@ -16,6 +16,6 @@ class SORLCUR (tag: Tag) extends Table[Sorlcur_r](tag, "SORLCUR") {
   def PIDM = column[Int]("SORLCUR_PIDM")
   def SEQNO = column[Int]("SORLCUR_SEQNO")
   def CACT_CODE = column[String]("SORLCUR_CACT_CODE")
-  def LmodCode = column[String]("SORLCURL_LMOD_CODE")
+  def LmodCode = column[String]("SORLCUR_LMOD_CODE")
   def * = (PIDM, SEQNO, CACT_CODE, LmodCode) <> (Sorlcur_r.tupled, Sorlcur_r.unapply)
 }
