@@ -412,8 +412,8 @@ trait IdentMethods {
                      sorlfos: Seq[Sorlfos_r]
                     ): Seq[IdentRecord] = {
 
-    val optionIdentSeq: Seq[Option[IdentRecord]] = users.map(user =>
-      GenerateIdent(UserConverter(user), identities, ents, employees, jobs, roles, faculty, perbfacs, students, sorlcur, sorlfos))
+    val optionIdentSeq: Seq[Option[IdentRecord]] = users.par.map(user =>
+      GenerateIdent(UserConverter(user), identities, ents, employees, jobs, roles, faculty, perbfacs, students, sorlcur, sorlfos)).seq
 
     val idents = optionIdentSeq.flatten
 
