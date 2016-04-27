@@ -36,7 +36,6 @@ object DatabaseMethods {
     StateContainer.MaxTerm match{
       case Some(term) => StateContainer.MaxTerm
       case None =>
-        println("In Database Loop")
         val dbConfig = getDatabaseConfig
         import dbConfig.driver.api._
         val db = dbConfig.db
