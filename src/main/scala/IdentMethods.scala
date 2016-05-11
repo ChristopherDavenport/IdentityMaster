@@ -34,6 +34,23 @@ trait IdentMethods {
   }
 
   /**
+    * This Method Returns The Best Email
+    * @param user Some User
+    * @param idents A Set of GOREMAL Records
+    * @return Best Email Record For The User
+    */
+  def UserToEmail(user: User, idents: Seq[GOREMAL_R]): Option[String] = {
+    val EmalCodes = List("CA", "CAS", "ECA", "ZCA", "ZCAS", "ZCH")
+    def findBestEmail(pidm: Int, idents: Seq[GOREMAL_R]): Option[String] = {
+      idents.filter(rec => rec.pidm == pidm && EmalCodes.contains(rec.emal_code))
+        .sortWith(_.emal_code < _.emal_code)
+        .map(_.email)
+        .headOption
+    }
+    findBestEmail(user.Pidm, idents)
+  }
+
+  /**
     * Produces the Username in Gobeacc if it exists
     *
     * @param user Some User
@@ -341,11 +358,13 @@ trait IdentMethods {
                     perbfacs: Seq[Perbfac_r],
                     students: Seq[Student],
                     sorlcur: Seq[Sorlcur_r],
-                    sorlfos: Seq[Sorlfos_r]): Option[IdentRecord] = user match {
+                    sorlfos: Seq[Sorlfos_r],
+                   goremal: Seq[GOREMAL_R]): Option[IdentRecord] = user match {
     case None => None
     case Some(u) =>
       val identColumns = UserToIdentColumns(u, idents)
       val entsColumn = UserToEnterpriseUsername(u, ents)
+      val emailColumn = UserToEmail(u, goremal)
       val empColumns = UserToEmployeeColumns(u, emps)
       val jobColumn = UserToJobColumns(u, jobs)
       val roleColumn = UserToRoleColumn(u, roles)
@@ -358,17 +377,18 @@ trait IdentMethods {
         IdentRecord(
           u.Identifier,
           u.Pidm,
-          identColumns._1,
+          PersonalInfo(identColumns._1,
           identColumns._2,
           identColumns._3,
-          entsColumn,
+          emailColumn),
+          BussinessInfo(entsColumn,
           empColumns._1,
           empColumns._2,
           empColumns._3,
           jobColumn._1,
           jobColumn._2,
-          roleColumn,
-          facultyColumns._1,
+          roleColumn),
+          EducationInfo(facultyColumns._1,
           facultyColumns._2,
           facultyColumns._3,
           facultyColumns._4,
@@ -377,7 +397,7 @@ trait IdentMethods {
           studentColumns._2,
           studentColumns._3,
           majorMinorColumns._1,
-          majorMinorColumns._2
+          majorMinorColumns._2)
         )
       )
   }
@@ -409,11 +429,12 @@ trait IdentMethods {
                      perbfacs: Seq[Perbfac_r],
                      students: Seq[Student],
                      sorlcur: Seq[Sorlcur_r],
-                     sorlfos: Seq[Sorlfos_r]
+                     sorlfos: Seq[Sorlfos_r],
+                    goremal: Seq[GOREMAL_R]
                     ): Seq[IdentRecord] = {
 
     val optionIdentSeq: Seq[Option[IdentRecord]] = users.par.map(user =>
-      GenerateIdent(UserConverter(user), identities, ents, employees, jobs, roles, faculty, perbfacs, students, sorlcur, sorlfos)).seq
+      GenerateIdent(UserConverter(user), identities, ents, employees, jobs, roles, faculty, perbfacs, students, sorlcur, sorlfos, goremal)).seq
 
     val idents = optionIdentSeq.flatten
 

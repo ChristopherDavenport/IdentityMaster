@@ -18,4 +18,5 @@ object AllTables {
   val spriden = TableQuery[SPRIDEN].filter(_.CHANGE_IND.isEmpty)
   val gobeacc = TableQuery[GOBEACC]
   val perbfac = TableQuery[PERBFAC]
+  val goremal = TableQuery[GOREMAL]
 }

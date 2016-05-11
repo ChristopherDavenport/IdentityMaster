@@ -37,12 +37,14 @@ object createIdentMaster extends App with IdentMethods{
     println("Gobeacc Returned")
     val allPerbfac = Await.result(db.run(perbfac.result), Duration.Inf)
     println("Perbfac Returned")
+    val allGoremal = Await.result(db.run(goremal.result), Duration.Inf)
+    println("Goremal Returned")
 
     // Generating  All records
     val IdentityRecords = GenerateIdents(allUsers,
       allSpriden, allGobeacc, allEmployees, allJobs,
       allRoles, allFaculty, allPerbfac, allStudents,
-      allSorlcur, allSorlfos )
+      allSorlcur, allSorlfos, allGoremal )
 
     println("Records Created")
 

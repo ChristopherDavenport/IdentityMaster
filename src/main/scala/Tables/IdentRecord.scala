@@ -8,42 +8,52 @@ import com.typesafe.slick.driver.oracle.OracleDriver.api._
 case class IdentRecord(
                         Username: String,
                         Pidm: Int,
+                        personalInfo: PersonalInfo,
+                        businessInfo: BussinessInfo,
+                        educationInfo: EducationInfo
+                      )
 
-                        EckerdId: Option[String],
-                        FirstName: Option[String],
-                        LastName: Option[String],
 
-                        EnterpriseUsername: Option[String],
+//                        EckerdId: Option[String],
+//                        FirstName: Option[String],
+//                        LastName: Option[String],
+//
+//                        Email: Option[String],
+//
+//                        EnterpriseUsername: Option[String],
+//
+//                        EmployeeClass: Option[String],
+//                        EmployeeStatus: Option[String],
+//                        HomeOrg: Option[String],
+//
+//                        JobOrg: Option[String],
+//                        JobPosn: Option[String],
+//
+//                        Roles: Option[String],
+//
+//                        FacultyStatus: Option[String],
+//                        FacultyTag: Option[String],
+//                        FacultySchdInd: Option[String],
+//                        FacultyAdvisorInd: Option[String],
+//
+//                        FacultyType: Option[String],
+//
+//                        StudentStatus: Option[String],
+//                        StudentLevel: Option[String],
+//                        StudentClass: Option[String],
+//
+//                        Majors: Option[String],
+//                        Minors: Option[String]
 
-                        EmployeeClass: Option[String],
-                        EmployeeStatus: Option[String],
-                        HomeOrg: Option[String],
 
-                        JobOrg: Option[String],
-                        JobPosn: Option[String],
 
-                        Roles: Option[String],
-
-                        FacultyStatus: Option[String],
-                        FacultyTag: Option[String],
-                        FacultySchdInd: Option[String],
-                        FacultyAdvisorInd: Option[String],
-
-                        FacultyType: Option[String],
-
-                        StudentStatus: Option[String],
-                        StudentLevel: Option[String],
-                        StudentClass: Option[String],
-
-                        Majors: Option[String],
-                        Minors: Option[String]
-
-                        )
 
 class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
 
   def Username = column[String]("USERNAME", O.PrimaryKey)
   def Pidm = column[Int]("PIDM")
+
+  def Email = column[Option[String]]("EMAIL")
 
   def EckerdId = column[Option[String]]("ECKERD_ID")
   def FirstName = column[Option[String]]("FIRST_NAME")
@@ -76,27 +86,86 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
   def * = (
     Username,
     Pidm ,
-    EckerdId,
-    FirstName,
-    LastName,
-    EnterpriseUsername,
-    EmployeeClass,
-    EmployeeStatus,
-    HomeOrg,
-    JobOrg,
-    JobPosn,
-    Roles,
-    FacultyStatus,
-    FacultyTag,
-    FacultySchdInd,
-    FacultyAdvisorInd,
-    FacultyType,
-    StudentStatus,
-    StudentLevel,
-    StudentClass,
-    StudentMajors,
-    StudentMinors
-    ) <> (IdentRecord.tupled, IdentRecord.unapply)
+    (EckerdId,
+      FirstName,
+      LastName,
+      Email
+      ),
+    (EnterpriseUsername,
+      EmployeeClass,
+      EmployeeStatus,
+      HomeOrg,
+      JobOrg,
+      JobPosn,
+      Roles
+      ),
+    (FacultyStatus,
+      FacultyTag,
+      FacultySchdInd,
+      FacultyAdvisorInd,
+      FacultyType,
+      StudentStatus,
+      StudentLevel,
+      StudentClass,
+      StudentMajors,
+      StudentMinors
+      )
+    ).shaped <> (
+    {
+      case (username, pidm, personalInfo, bussinessInfo, educationInfo) =>
+        IdentRecord(
+          username,
+          pidm,
+          PersonalInfo.tupled.apply(personalInfo),
+          BussinessInfo.tupled.apply(bussinessInfo),
+          EducationInfo.tupled.apply(educationInfo)
+        )
+    },
+    {
+      i: IdentRecord =>
+        def f1(p: PersonalInfo) = PersonalInfo.unapply(p).get
+        def f2(p: BussinessInfo) = BussinessInfo.unapply(p).get
+        def f3(p: EducationInfo) = EducationInfo.unapply(p).get
+        Some((i.Username, i.Pidm, f1(i.personalInfo), f2(i.businessInfo), f3(i.educationInfo)))
+    }
+    )
 
   def pidmIndex = index("pidm_index", Pidm, unique=true)
 }
+
+case class PersonalInfo(
+                         EckerdId: Option[String],
+                         FirstName: Option[String],
+                         LastName: Option[String],
+
+                         Email: Option[String]
+                       )
+
+case class BussinessInfo(
+                          EnterpriseUsername: Option[String],
+
+                          EmployeeClass: Option[String],
+                          EmployeeStatus: Option[String],
+                          HomeOrg: Option[String],
+
+                          JobOrg: Option[String],
+                          JobPosn: Option[String],
+
+                          Roles: Option[String]
+                        )
+
+case class EducationInfo(
+                          FacultyStatus: Option[String],
+                          FacultyTag: Option[String],
+                          FacultySchdInd: Option[String],
+                          FacultyAdvisorInd: Option[String],
+
+                          FacultyType: Option[String],
+
+                          StudentStatus: Option[String],
+                          StudentLevel: Option[String],
+                          StudentClass: Option[String],
+
+                          Majors: Option[String],
+                          Minors: Option[String]
+                        )
