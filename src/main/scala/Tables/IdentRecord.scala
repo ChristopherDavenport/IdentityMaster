@@ -10,43 +10,9 @@ case class IdentRecord(
                         Pidm: Int,
                         personalInfo: PersonalInfo,
                         businessInfo: BussinessInfo,
-                        educationInfo: EducationInfo
+                        facultyInfo: FacultyInfo,
+                        studentInfo: StudentInfo
                       )
-
-
-//                        EckerdId: Option[String],
-//                        FirstName: Option[String],
-//                        LastName: Option[String],
-//
-//                        Email: Option[String],
-//
-//                        EnterpriseUsername: Option[String],
-//
-//                        EmployeeClass: Option[String],
-//                        EmployeeStatus: Option[String],
-//                        HomeOrg: Option[String],
-//
-//                        JobOrg: Option[String],
-//                        JobPosn: Option[String],
-//
-//                        Roles: Option[String],
-//
-//                        FacultyStatus: Option[String],
-//                        FacultyTag: Option[String],
-//                        FacultySchdInd: Option[String],
-//                        FacultyAdvisorInd: Option[String],
-//
-//                        FacultyType: Option[String],
-//
-//                        StudentStatus: Option[String],
-//                        StudentLevel: Option[String],
-//                        StudentClass: Option[String],
-//
-//                        Majors: Option[String],
-//                        Minors: Option[String]
-
-
-
 
 class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
 
@@ -103,8 +69,9 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
       FacultyTag,
       FacultySchdInd,
       FacultyAdvisorInd,
-      FacultyType,
-      StudentStatus,
+      FacultyType
+      ),
+      (StudentStatus,
       StudentLevel,
       StudentClass,
       StudentMajors,
@@ -112,21 +79,23 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
       )
     ).shaped <> (
     {
-      case (username, pidm, personalInfo, bussinessInfo, educationInfo) =>
+      case (username, pidm, personalInfo, bussinessInfo, facultyInfo, studentInfo) =>
         IdentRecord(
           username,
           pidm,
           PersonalInfo.tupled.apply(personalInfo),
           BussinessInfo.tupled.apply(bussinessInfo),
-          EducationInfo.tupled.apply(educationInfo)
+          FacultyInfo.tupled.apply(facultyInfo),
+          StudentInfo.tupled.apply(studentInfo)
         )
     },
     {
       i: IdentRecord =>
         def f1(p: PersonalInfo) = PersonalInfo.unapply(p).get
         def f2(p: BussinessInfo) = BussinessInfo.unapply(p).get
-        def f3(p: EducationInfo) = EducationInfo.unapply(p).get
-        Some((i.Username, i.Pidm, f1(i.personalInfo), f2(i.businessInfo), f3(i.educationInfo)))
+        def f3(p: FacultyInfo) = FacultyInfo.unapply(p).get
+        def f4(p: StudentInfo) = StudentInfo.unapply(p).get
+        Some((i.Username, i.Pidm, f1(i.personalInfo), f2(i.businessInfo), f3(i.facultyInfo), f4(i.studentInfo)))
     }
     )
 
@@ -154,18 +123,20 @@ case class BussinessInfo(
                           Roles: Option[String]
                         )
 
-case class EducationInfo(
+case class FacultyInfo(
                           FacultyStatus: Option[String],
                           FacultyTag: Option[String],
                           FacultySchdInd: Option[String],
                           FacultyAdvisorInd: Option[String],
 
-                          FacultyType: Option[String],
-
-                          StudentStatus: Option[String],
-                          StudentLevel: Option[String],
-                          StudentClass: Option[String],
-
-                          Majors: Option[String],
-                          Minors: Option[String]
+                          FacultyType: Option[String]
                         )
+
+case class StudentInfo(
+                        StudentStatus: Option[String],
+                        StudentLevel: Option[String],
+                        StudentClass: Option[String],
+
+                        Majors: Option[String],
+                        Minors: Option[String]
+                      )
