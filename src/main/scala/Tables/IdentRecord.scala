@@ -6,7 +6,6 @@ package Tables
 import com.typesafe.slick.driver.oracle.OracleDriver.api._
 
 case class IdentRecord(
-                        Username: String,
                         Pidm: Int,
                         personalInfo: PersonalInfo,
                         businessInfo: BussinessInfo,
@@ -14,11 +13,13 @@ case class IdentRecord(
                         studentInfo: StudentInfo
                       )
 case class PersonalInfo(
+
                          EckerdId: Option[String],
                          FirstName: Option[String],
                          LastName: Option[String],
 
-                         Email: Option[String]
+                         PrimaryEmail: Option[String],
+                         PrimaryEmailID: Option[String]
                        )
 
 case class BussinessInfo(
@@ -54,14 +55,15 @@ case class StudentInfo(
 
 class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
 
-  def Username = column[String]("USERNAME", O.PrimaryKey)
-  def Pidm = column[Int]("PIDM")
 
-  def Email = column[Option[String]]("EMAIL")
-
+  def Pidm = column[Int]("PIDM", O.PrimaryKey)
   def EckerdId = column[Option[String]]("ECKERD_ID")
+
   def FirstName = column[Option[String]]("FIRST_NAME")
   def LastName = column[Option[String]]("LAST_NAME")
+  def PrimaryEmailId = column[Option[String]]("PRIMARY_EMAIL_ID")
+  def PrimaryEmail = column[Option[String]]("PRIMARY_EMAIL")
+  def StudentEmail = column[Option[String]]("STUDENT_EMAIL")
 
   def EnterpriseUsername = column[Option[String]]("ENTERPRISE_USERNAME")
 
@@ -88,12 +90,13 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
   def StudentMinors = column[Option[String]]("STUDENT_MINORS")
 
   def * = (
-    Username,
+
     Pidm ,
     (EckerdId,
       FirstName,
       LastName,
-      Email
+      PrimaryEmail,
+      PrimaryEmailId
       ),
     (EnterpriseUsername,
       EmployeeClass,
@@ -117,9 +120,8 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
       )
     ).shaped <> (
     {
-      case (username, pidm, personalInfo, bussinessInfo, facultyInfo, studentInfo) =>
+      case (pidm, personalInfo, bussinessInfo, facultyInfo, studentInfo) =>
         IdentRecord(
-          username,
           pidm,
           PersonalInfo.tupled.apply(personalInfo),
           BussinessInfo.tupled.apply(bussinessInfo),
@@ -133,10 +135,9 @@ class IDENT_MASTER (tag: Tag) extends Table[IdentRecord](tag, "IDENT_MASTER") {
         def f2(p: BussinessInfo) = BussinessInfo.unapply(p).get
         def f3(p: FacultyInfo) = FacultyInfo.unapply(p).get
         def f4(p: StudentInfo) = StudentInfo.unapply(p).get
-        Some((i.Username, i.Pidm, f1(i.personalInfo), f2(i.businessInfo), f3(i.facultyInfo), f4(i.studentInfo)))
+        Some((i.Pidm, f1(i.personalInfo), f2(i.businessInfo), f3(i.facultyInfo), f4(i.studentInfo)))
     }
     )
 
-  def pidmIndex = index("pidm_index", Pidm, unique=true)
 }
 

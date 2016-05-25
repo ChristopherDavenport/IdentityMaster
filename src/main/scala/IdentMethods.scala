@@ -33,21 +33,27 @@ trait IdentMethods {
     IColumns
   }
 
+  private def findBestEmail(pidm: Int, idents: Seq[GOREMAL_R], EmalCodes: List[String]): Option[String] = {
+    idents.filter(rec => rec.pidm == pidm && EmalCodes.contains(rec.emal_code))
+      .sortWith(_.emal_code < _.emal_code)
+      .map(_.email)
+      .headOption
+  }
+
   /**
     * This Method Returns The Best Email
     * @param user Some User
     * @param idents A Set of GOREMAL Records
     * @return Best Email Record For The User
     */
-  def UserToEmail(user: User, idents: Seq[GOREMAL_R]): Option[String] = {
+  def UserToPrimaryEmail(user: User, idents: Seq[GOREMAL_R]): Option[String] = {
     val EmalCodes = List("CA", "CAS", "ECA", "ZCA", "ZCAS", "ZCH")
-    def findBestEmail(pidm: Int, idents: Seq[GOREMAL_R]): Option[String] = {
-      idents.filter(rec => rec.pidm == pidm && EmalCodes.contains(rec.emal_code))
-        .sortWith(_.emal_code < _.emal_code)
-        .map(_.email)
-        .headOption
-    }
-    findBestEmail(user.Pidm, idents)
+    findBestEmail(user.Pidm, idents, EmalCodes)
+  }
+
+  def UserToStudentEmail(user: User, idents: Seq[GOREMAL_R]): Option[String] = {
+    val StudentCodes = List("CAS", "ZCAS")
+    findBestEmail(user.Pidm, idents, StudentCodes)
   }
 
   /**
@@ -364,7 +370,8 @@ trait IdentMethods {
     case Some(u) =>
       val identColumns = UserToIdentColumns(u, idents)
       val entsColumn = UserToEnterpriseUsername(u, ents)
-      val emailColumn = UserToEmail(u, goremal)
+      val emailColumn = UserToPrimaryEmail(u, goremal)
+      val studentEmail = UserToStudentEmail(u, goremal)
       val empColumns = UserToEmployeeColumns(u, emps)
       val jobColumn = UserToJobColumns(u, jobs)
       val roleColumn = UserToRoleColumn(u, roles)
@@ -375,29 +382,43 @@ trait IdentMethods {
 
       Some(
         IdentRecord(
-          u.Identifier,
+
           u.Pidm,
-          PersonalInfo(identColumns._1,
-          identColumns._2,
-          identColumns._3,
-          emailColumn),
-          BussinessInfo(entsColumn,
-          empColumns._1,
-          empColumns._2,
-          empColumns._3,
-          jobColumn._1,
-          jobColumn._2,
-          roleColumn),
-          FacultyInfo(facultyColumns._1,
-          facultyColumns._2,
-          facultyColumns._3,
-          facultyColumns._4,
-          facultyTypeColumn),
-          StudentInfo(studentColumns._1,
-          studentColumns._2,
-          studentColumns._3,
-          majorMinorColumns._1,
-          majorMinorColumns._2)
+
+          PersonalInfo(
+            identColumns._1,
+            identColumns._2,
+            identColumns._3,
+            emailColumn,
+            Some(u.Identifier)
+          ),
+
+          BussinessInfo(
+            entsColumn,
+            empColumns._1,
+            empColumns._2,
+            empColumns._3,
+            jobColumn._1,
+            jobColumn._2,
+            roleColumn
+          ),
+
+          FacultyInfo(
+            facultyColumns._1,
+            facultyColumns._2,
+            facultyColumns._3,
+            facultyColumns._4,
+            facultyTypeColumn
+          ),
+
+          StudentInfo(
+            studentColumns._1,
+            studentColumns._2,
+            studentColumns._3,
+            majorMinorColumns._1,
+            majorMinorColumns._2
+          )
+
         )
       )
   }
